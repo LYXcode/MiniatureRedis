@@ -8,6 +8,17 @@ public class ServerConfig extends Config {
     private int maximumPoolSize;
     private long keepAliveTime;
     private int capacity;
+
+    public ServerConfig(String host, int port, int maxClients, int corePoolSize, int maximumPoolSize, long keepAliveTime, int capacity) {
+        this.host = host;
+        this.port = port;
+        this.maxClients = maxClients;
+        this.corePoolSize = corePoolSize;
+        this.maximumPoolSize = maximumPoolSize;
+        this.keepAliveTime =keepAliveTime;
+        this.capacity = capacity;
+    }
+
     public void setKeepAliveTime(long keepAliveTime) {
         this.keepAliveTime = keepAliveTime;
     }
@@ -43,11 +54,6 @@ public class ServerConfig extends Config {
     }
 
 
-    public ServerConfig(String host, int port, int maxClients) {
-        this.host = host;
-        this.port = port;
-        this.maxClients = maxClients;
-    }
 
     public String getHost() {
         return host;

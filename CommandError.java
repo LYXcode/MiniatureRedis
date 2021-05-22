@@ -1,3 +1,3 @@
-public class CommandError {
+public class CommandError extends Exception{
     
 }

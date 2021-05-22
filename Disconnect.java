@@ -1,3 +1,3 @@
-public class Disconnect {
+public class Disconnect extends Exception{
     
 }
