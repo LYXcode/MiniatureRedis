@@ -11,7 +11,7 @@ public class Client {
         try {
             Socket socket = new Socket("127.0.0.1", 4999);
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            bufferedWriter.write("+this is a simple string\r\n");
+            bufferedWriter.write("set \"key  key\" value\r\n");
             bufferedWriter.flush();
             bufferedWriter.close();
             

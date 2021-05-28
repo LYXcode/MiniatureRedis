@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import CommandHandler.SetHandler;
+
 public class ProtocolHandler extends AbstractProtocolHandler {
 
     public void handleRequest(Socket socket) throws IOException {
@@ -18,6 +20,10 @@ public class ProtocolHandler extends AbstractProtocolHandler {
             }
             stringBuffer.add(content);
         }
+
+        SetHandler setHandler = new SetHandler(stringBuffer);
+
+        System.out.println(stringBuffer.get(0));
 
         String firstString = stringBuffer.get(0);
 
