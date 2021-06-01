@@ -2,16 +2,15 @@ package CommandHandler;
 
 import java.util.ArrayList;
 
-public class SetHandler {
-    public ArrayList<String> stringBuffer;
+import Response.RedisResponse;
 
-    public SetHandler(ArrayList<String> stringBuffer) {
-        this.stringBuffer = stringBuffer;
-        String[] strings = RedisUtils.parseCommandString(stringBuffer.get(0));
-        operation(strings);
-    }
+public class SetHandler extends AbstractCommandHandler{
+    // public ArrayList<String> stringBuffer;
 
-    private void operation(String[] strings) {
+
+    public RedisResponse operation(String[] strings) {
+
+        RedisResponse response = new RedisResponse();
         for (String s : strings) {
             System.out.println(s);
         }

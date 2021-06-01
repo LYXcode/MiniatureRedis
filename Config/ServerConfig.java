@@ -1,3 +1,4 @@
+package Config;
 public class ServerConfig extends Config {
 
     private String host;

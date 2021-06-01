@@ -1,3 +1,4 @@
+package Storage;
 import java.util.HashMap;
 
 import DataType.HashType;
