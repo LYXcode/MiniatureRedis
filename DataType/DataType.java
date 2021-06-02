@@ -1,7 +1,7 @@
 package DataType;
 
 public class DataType {
-    public long expireTime;
+    public long expireTime = 0L;
 
     public long getExpireTime() {
         return expireTime;

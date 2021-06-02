@@ -13,7 +13,7 @@ public class Client {
             Socket socket = new Socket("127.0.0.1", 4999);
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            bufferedWriter.write("se \"key  key\" value\r\n");
+            bufferedWriter.write("set key value expire 60\r\n");
 
             bufferedWriter.flush();
 

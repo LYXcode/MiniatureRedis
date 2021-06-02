@@ -39,6 +39,8 @@ public class ProtocolHandler extends AbstractProtocolHandler {
             response.setMessage("no such command " + commandElement[0]);
         }
 
+        response = commandHandler.operation(commandElement);
+
         bufferedWriter.write(response.toString());
         bufferedWriter.flush();
         bufferedWriter.close();

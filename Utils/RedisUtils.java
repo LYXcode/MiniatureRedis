@@ -1,5 +1,6 @@
-package CommandHandler;
+package Utils;
 
+import java.util.regex.Pattern;
 
 public class RedisUtils {
     public static String[] parseCommandString(String commandString) {
@@ -17,5 +18,10 @@ public class RedisUtils {
         // commandString = commandString.substring(currentPos, commandString.length());
 
         // return commandString.split("\\s+");
+    }
+
+    public static boolean isNumericString(String string){
+        Pattern pattern = Pattern.compile("[0-9]*");
+        return pattern.matcher(string).matches();
     }
 }
