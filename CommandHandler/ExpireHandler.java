@@ -17,7 +17,7 @@ public class ExpireHandler extends AbstractCommandHandler {
 
         switch (command) {
             case "EXPIRE":
-                response = exporeOpearation(strings);
+                response = expireOpearation(strings);
                 break;
 
             case "TTL":
@@ -48,7 +48,7 @@ public class ExpireHandler extends AbstractCommandHandler {
         return response;
     }
 
-    public RedisResponse exporeOpearation(String[] strings) {
+    public RedisResponse expireOpearation(String[] strings) {
         RedisResponse response = new RedisResponse();
         String result = "";
         if (strings.length < 3 || strings.length % 2 != 1) {
@@ -59,24 +59,9 @@ public class ExpireHandler extends AbstractCommandHandler {
             if (i % 2 == 1) {
                 String key = strings[i];
                 String expireTime = strings[i + 1];
+                int res = Storage.getStorage().expire(key, expireTime);
+                result = result + String.valueOf(res) + " ";
 
-                if (!Storage.getStorage().exists(key)) {
-                    result = result + "0" + " ";
-                } else {
-                    if (!RedisUtils.isNumericString(expireTime) || Long.valueOf(expireTime) < 0) {
-                        result = result + "0" + " ";
-                    }
-
-                    else {
-                        StringType data = Storage.getStorage().getString(key);
-                        long currenTime = new Date().getTime();
-                        long et = currenTime + 1000 * Long.valueOf(expireTime);
-                        data.setExpireTime(et);
-                        Storage.getStorage().setString(key, data);
-                        result = result + "1" + " ";
-
-                    }
-                }
             }
         }
 

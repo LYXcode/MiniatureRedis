@@ -19,8 +19,8 @@ public class Client {
             // bufferedWriter.write("strlen key0 key1 key2\r\n");
             // bufferedWriter.write("decr key0 key1 key2\r\n");
             //  bufferedWriter.write("exists key0 key1 key2 key3\r\n");
-            // bufferedWriter.write("expire key0 900 key1 899 key2 10\r\n");
-            // bufferedWriter.write("ttl key0  key1  key2 key5 \r\n");
+            // bufferedWriter.write("expire key0 900\r\n");
+            bufferedWriter.write("ttl key0  key1  key2 key5 \r\n");
 
             bufferedWriter.flush();
 

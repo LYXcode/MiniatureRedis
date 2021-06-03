@@ -3,12 +3,15 @@ package Storage;
 import java.util.Date;
 import java.util.HashMap;
 
+import javax.xml.crypto.Data;
+
 import DataType.DataType;
 import DataType.HashType;
 import DataType.ListType;
 import DataType.SetType;
 import DataType.StringType;
 import Meta.Types;
+import Utils.RedisUtils;
 
 public class Storage {
     private volatile static Storage storage;
@@ -47,15 +50,9 @@ public class Storage {
     }
 
     public boolean setString(String key, StringType value) {
-        // if (!checkKeyValidation(key, dataTypes[0])) {
-        //     return false;
-        // }
-
-        // StorageMap.get(dataTypes[0]).put(key, value);
-        // keyPool.put(key, dataTypes[0]);
 
         return addKeyValue(key, dataTypes[0], value);
-        
+
     }
 
     public StringType getString(String key) {
@@ -66,6 +63,30 @@ public class Storage {
         }
     }
 
+    public int expire(String key, String expireTime) {
+        int result = 0;
+        if (!Storage.getStorage().exists(key)) {
+            result = 0;
+        } else {
+            if (!RedisUtils.isNumericString(expireTime) || Long.valueOf(expireTime) < 0) {
+                result = 0;
+            }
+
+            else {
+
+                DataType data = getDataFromKey(key);
+                long currenTime = new Date().getTime();
+
+                data.setExpireTime((currenTime + 1000 * Long.valueOf(expireTime)));
+
+                result = 1;
+
+            }
+        }
+
+        return result;
+    }
+
     public long ttl(String key) {
         if (!keyPool.containsKey(key)) {
             return -1;
@@ -73,11 +94,12 @@ public class Storage {
         String type = keyPool.get(key);
         DataType data = StorageMap.get(type).get(key);
         long currentTime = new Date().getTime();
+
         long ttl = data.getExpireTime() - currentTime;
 
-        if (ttl < 0) {
-            removeKeyValue(key);
-            ttl = -1;
+        if (ttl < 0L) {
+            deleteKey(key);
+            return -1;
         }
 
         return ttl / 1000;
@@ -93,13 +115,15 @@ public class Storage {
         return true;
     }
 
-    public void removeKeyValue(String key) {
-        if (keyPool.containsKey(key)) {
-            String type = keyPool.get(key);
-            StorageMap.get(type).remove(key);
-            keyPool.remove(key);
-
+    public boolean deleteKey(String key) {
+        if (!keyPool.containsKey(key)) {
+            return true;
         }
+
+        String type = keyPool.get(key);
+        StorageMap.get(type).remove(key);
+        keyPool.remove(key);
+        return true;
     }
 
     public DataType getDataFromKey(String key) {
@@ -113,17 +137,6 @@ public class Storage {
 
     public boolean exists(String key) {
         return keyPool.containsKey(key);
-    }
-
-    public boolean deleteKey(String key) {
-        if (!keyPool.containsKey(key)) {
-            return true;
-        }
-
-        String type = keyPool.get(key);
-        StorageMap.get(type).remove(key);
-        keyPool.remove(key);
-        return true;
     }
 
     public boolean checkKeyValidation(String key, String type) {
