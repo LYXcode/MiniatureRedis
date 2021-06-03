@@ -21,7 +21,7 @@ public class RedisUtils {
     }
 
     public static boolean isNumericString(String string){
-        Pattern pattern = Pattern.compile("[0-9]*");
+        Pattern pattern = Pattern.compile("-?[0-9]*");
         return pattern.matcher(string).matches();
     }
 }

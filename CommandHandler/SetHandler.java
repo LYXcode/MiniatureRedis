@@ -1,6 +1,7 @@
 package CommandHandler;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import DataType.StringType;
 import Response.RedisResponse;
@@ -15,6 +16,8 @@ public class SetHandler extends AbstractCommandHandler {
         String expireTime = "0";
 
         RedisResponse response = new RedisResponse();
+
+        System.out.println("SET COMMAND OPERATION......");
         if (strings.length % 2 == 0) {
             response.setMessage(
                     "SET KEY VALUE [EXPIRE TIME] expected! but " + String.valueOf(strings.length - 1) + " received.");
@@ -27,7 +30,8 @@ public class SetHandler extends AbstractCommandHandler {
                         return response;
                     }
                     expireTime = strings[i + 1];
-                    if (!RedisUtils.isNumericString(expireTime)) {
+                    if (!RedisUtils.isNumericString(expireTime) || Long.valueOf(expireTime) < 0) {
+
                         response.setMessage("expire argument should be number, which is not less than 0!");
                         return response;
                     }
@@ -40,25 +44,25 @@ public class SetHandler extends AbstractCommandHandler {
                 keyValuePair.add(strings[i]);
                 System.out.println(strings[i]);
             }
-            System.out.println(keyValuePair.size());
 
             for (int i = 0; i < keyValuePair.size(); i++) {
                 if (i % 2 == 0) {
                     StringType stringData = new StringType();
                     stringData.setData(keyValuePair.get(i + 1));
                     if (!expireTime.equals("0")) {
-                        Long et = Long.valueOf(expireTime);
-                        stringData.setExpireTime(et);
+                        long et = Long.valueOf(expireTime) * 1000;
+                        long currenTime = new Date().getTime();
+                        stringData.setExpireTime(currenTime + et);
                     }
-                    Storage.getStorage().stringStorage.put(keyValuePair.get(i), stringData);
+                    Storage.getStorage().setString(keyValuePair.get(i), stringData);
                 }
             }
 
             System.out.println("expire time " + expireTime);
-            response.setMessage("OK");
+            response.setMessage("1");
 
-            System.out.println(Storage.getStorage().stringStorage.get("key").getData());
-            System.out.println(Storage.getStorage().stringStorage.get("key").getExpireTime());
+            // System.out.println(Storage.getStorage().stringStorage.get("key").getData());
+            // System.out.println(Storage.getStorage().stringStorage.get("key").getExpireTime());
         }
 
         return response;

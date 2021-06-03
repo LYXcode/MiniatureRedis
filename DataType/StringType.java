@@ -1,10 +1,9 @@
 package DataType;
 
-
-
-public class StringType extends DataType{
+public class StringType extends DataType {
     String data;
 
+    @Override
     public String getData() {
         return data;
     }
