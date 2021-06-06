@@ -1,5 +1,6 @@
 package Storage;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -12,6 +13,7 @@ import DataType.SetType;
 import DataType.StringType;
 import Meta.Types;
 import Utils.RedisUtils;
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
 public class Storage {
     private volatile static Storage storage;
@@ -63,6 +65,16 @@ public class Storage {
         }
     }
 
+    public int persist(String key) {
+        DataType data = getDataFromKey(key);
+        if (key == null) {
+            return 0;
+        }
+
+        data.setExpireTime(0L);
+        return 1;
+    }
+
     public int expire(String key, String expireTime) {
         int result = 0;
         if (!Storage.getStorage().exists(key)) {
@@ -91,8 +103,14 @@ public class Storage {
         if (!keyPool.containsKey(key)) {
             return -1;
         }
+
         String type = keyPool.get(key);
         DataType data = StorageMap.get(type).get(key);
+
+        if (data.getExpireTime() == 0L) {
+            return -1;
+        }
+
         long currentTime = new Date().getTime();
 
         long ttl = data.getExpireTime() - currentTime;
@@ -103,6 +121,70 @@ public class Storage {
         }
 
         return ttl / 1000;
+    }
+
+    public int listPush(String key, String value, boolean leftPush) {
+        String type = dataTypes[1];
+        if (exists(key)) {
+            DataType data = getDataFromKey(key);
+            if (!leftPush) {
+                data.getDataList().add(value);
+            } else {
+                data.getDataList().add(0, value);
+            }
+
+        }
+
+        else {
+            if (!checkKeyValidation(key, type)) {
+                return 0;
+            }
+            ListType list = new ListType();
+            list.getDataList().add(value);
+            StorageMap.get(type).put(key, list);
+            keyPool.put(key, type);
+        }
+        return 1;
+    }
+
+    public String listRange(String key, int start, int end, boolean rightRange) {
+        if (!exists(key)) {
+            return null;
+        }
+
+        ttl(key);
+        DataType list = getDataFromKey(key);
+        if (list == null) {
+            return null;
+        }
+        String result = "";
+        ArrayList<String> listData = list.getDataList();
+        int size = listData.size();
+        int startPos = 0, endPos = 0;
+        if (start == -1 && end == -1) {
+            startPos = 0;
+            endPos = size - 1;
+        } else {
+            startPos = start <= 0 ? 0 : (start > size - 1 ? size - 1 : start);
+            endPos = end > size - 1 ? size - 1 : (end <= 0 ? 0 : end);
+        }
+
+        if (startPos > endPos || startPos > size - 1) {
+            return null;
+        }
+
+        if (rightRange) {
+            for (int i = size - startPos - 1; i >= size - endPos - 1; i--) {
+                result = result + listData.get(i) + " ";
+            }
+        } else {
+            for (int i = startPos; i <= endPos; i++) {
+                result = result + listData.get(i) + " ";
+            }
+
+        }
+
+        return result;
     }
 
     public boolean addKeyValue(String key, String type, DataType value) {
@@ -141,7 +223,7 @@ public class Storage {
 
     public boolean checkKeyValidation(String key, String type) {
         if (this.keyPool.containsKey(key)) {
-            if (!(this.keyPool.get(key) == type)) {
+            if (!(this.keyPool.get(key).equals(type))) {
                 return false;
             }
         }

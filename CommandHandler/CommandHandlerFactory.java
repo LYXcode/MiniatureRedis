@@ -30,9 +30,19 @@ public class CommandHandlerFactory {
 
             case "EXPIRE":
             case "TTL":
+            case "PERSIST":
                 commandHandler = new ExpireHandler();
                 break;
 
+            case "RPUSH":
+            case "LPUSH":
+                commandHandler = new PushHandler();
+                break;
+
+            case "RRANGE":
+            case "LRANGE":
+                commandHandler = new RangeHandler();
+                break;
             default:
                 commandHandler = null;
 

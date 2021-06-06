@@ -24,9 +24,29 @@ public class ExpireHandler extends AbstractCommandHandler {
                 response = ttlOperation(strings);
                 break;
 
+            case "PERSIST":
+                response = persistOperation(strings);
+                break;
+
         }
 
         return response;
+    }
+
+    public RedisResponse persistOperation(String[] strings) {
+        RedisResponse response = new RedisResponse();
+        String result = "";
+        int stringNum = strings.length;
+        Storage storage = Storage.getStorage();
+        for (int i = 1; i < stringNum; i++) {
+            String key = strings[i];
+            int res = storage.persist(key);
+            result = result + String.valueOf(res) + " ";
+        }
+
+        response.setMessage(result);
+        return response;
+
     }
 
     public RedisResponse ttlOperation(String[] strings) {
