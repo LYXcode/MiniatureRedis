@@ -15,11 +15,15 @@ public class Client {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             // bufferedWriter.write("rpush list0 value0 value1 value3 value123456\r\n");
-            bufferedWriter.write("rrange list0 2 5\r\n");
+            // bufferedWriter.write("rrange list0 2 5\r\n");
             // bufferedWriter.write("rpush list1  value123 value987\r\n");
-            // bufferedWriter.write("rrange list1\r\n");
+            bufferedWriter.write("rrange list0\r\n");
             // bufferedWriter.write("expire list0 20\r\n");
             // bufferedWriter.write("ttl list0\r\n");
+            // bufferedWriter.write("llen list0 list1\r\n");
+            // bufferedWriter.write("rpop list0 \r\n");
+            // bufferedWriter.write("lpop list0 \r\n");
+            // bufferedWriter.write("get list0\r\n");
             
 
 

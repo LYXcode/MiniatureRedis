@@ -43,6 +43,14 @@ public class CommandHandlerFactory {
             case "LRANGE":
                 commandHandler = new RangeHandler();
                 break;
+
+            case "LLEN":
+                commandHandler = new LlenHandler();
+                break;
+            case "RPOP":
+            case "LPOP":
+                commandHandler = new PopHandler();
+                break;
             default:
                 commandHandler = null;
 

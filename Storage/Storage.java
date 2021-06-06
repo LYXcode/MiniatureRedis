@@ -13,7 +13,7 @@ import DataType.SetType;
 import DataType.StringType;
 import Meta.Types;
 import Utils.RedisUtils;
-import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
+
 
 public class Storage {
     private volatile static Storage storage;
@@ -59,7 +59,11 @@ public class Storage {
 
     public StringType getString(String key) {
         if (keyPool.containsKey(key) && StorageMap.get(keyPool.get(key)).containsKey(key)) {
-            return (StringType) StorageMap.get(keyPool.get(key)).get(key);
+            try {
+                return (StringType) StorageMap.get(keyPool.get(key)).get(key);
+            } catch (Exception e) {
+                return null;
+            }
         } else {
             return null;
         }
@@ -99,7 +103,7 @@ public class Storage {
         return result;
     }
 
-    public long ttl(String key) {
+    public synchronized long ttl(String key) {
         if (!keyPool.containsKey(key)) {
             return -1;
         }
@@ -123,7 +127,7 @@ public class Storage {
         return ttl / 1000;
     }
 
-    public int listPush(String key, String value, boolean leftPush) {
+    public synchronized int listPush(String key, String value, boolean leftPush) {
         String type = dataTypes[1];
         if (exists(key)) {
             DataType data = getDataFromKey(key);
@@ -147,6 +151,55 @@ public class Storage {
         return 1;
     }
 
+    public String listPop(String key, boolean rightPop) {
+        if (!exists(key)) {
+            return null;
+        }
+
+        ttl(key);
+        DataType list = getDataFromKey(key);
+        if (list == null) {
+            return null;
+        }
+        String result = "";
+
+        try {
+            ArrayList<String> listData = list.getDataList();
+            if (rightPop) {
+                result = listData.remove(listData.size() - 1);
+            } else {
+                result = listData.remove(0);
+            }
+
+        } catch (Exception e) {
+            return null;
+        }
+
+        return result;
+    }
+
+    public String listLength(String key) {
+        if (!exists(key)) {
+            return "-1";
+        }
+
+        ttl(key);
+        DataType list = getDataFromKey(key);
+        if (list == null) {
+            return "-1";
+        }
+        String result = "";
+
+        try {
+            ArrayList<String> listData = list.getDataList();
+            result = String.valueOf(listData.size());
+        } catch (Exception e) {
+            return "-1";
+        }
+
+        return result;
+    }
+
     public String listRange(String key, int start, int end, boolean rightRange) {
         if (!exists(key)) {
             return null;
@@ -158,30 +211,34 @@ public class Storage {
             return null;
         }
         String result = "";
-        ArrayList<String> listData = list.getDataList();
-        int size = listData.size();
-        int startPos = 0, endPos = 0;
-        if (start == -1 && end == -1) {
-            startPos = 0;
-            endPos = size - 1;
-        } else {
-            startPos = start <= 0 ? 0 : (start > size - 1 ? size - 1 : start);
-            endPos = end > size - 1 ? size - 1 : (end <= 0 ? 0 : end);
-        }
 
-        if (startPos > endPos || startPos > size - 1) {
+        try {
+            ArrayList<String> listData = list.getDataList();
+            int size = listData.size();
+            int startPos = 0, endPos = 0;
+            if (start == -1 && end == -1) {
+                startPos = 0;
+                endPos = size - 1;
+            } else {
+                startPos = start <= 0 ? 0 : (start > size - 1 ? size - 1 : start);
+                endPos = end > size - 1 ? size - 1 : (end <= 0 ? 0 : end);
+            }
+
+            if (startPos > endPos || startPos > size - 1) {
+                return null;
+            }
+            if (rightRange) {
+                for (int i = size - startPos - 1; i >= size - endPos - 1; i--) {
+                    result = result + listData.get(i) + " ";
+                }
+            } else {
+                for (int i = startPos; i <= endPos; i++) {
+                    result = result + listData.get(i) + " ";
+                }
+
+            }
+        } catch (Exception e) {
             return null;
-        }
-
-        if (rightRange) {
-            for (int i = size - startPos - 1; i >= size - endPos - 1; i--) {
-                result = result + listData.get(i) + " ";
-            }
-        } else {
-            for (int i = startPos; i <= endPos; i++) {
-                result = result + listData.get(i) + " ";
-            }
-
         }
 
         return result;

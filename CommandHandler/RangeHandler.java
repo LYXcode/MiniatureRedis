@@ -46,6 +46,9 @@ public class RangeHandler extends AbstractCommandHandler {
                 result = storage.listRange(key, start, end, false);
 
         }
+        if(result == null){
+            result = "no such key in list";
+        }
 
         response.setMessage(result);
         return response;
