@@ -14,10 +14,23 @@ public class Client {
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+
+            // bufferedWriter.write("sadd set0 value0 value1 value3 value123456\r\n");
+            // bufferedWriter.write("sadd set1 value3 value123456 valuehhhhh\r\n");
+            // bufferedWriter.write("srem set0 value0\r\n");
+            bufferedWriter.write("smembers set0\r\n");
+            // bufferedWriter.write("sunion set0 set1\r\n");
+            // bufferedWriter.write("sismember set0 value12\r\n");
+            // bufferedWriter.write("srandmembers set0 3\r\n");
+            // bufferedWriter.write("spop set0 2\r\n");
+
+
+
+
             // bufferedWriter.write("rpush list0 value0 value1 value3 value123456\r\n");
             // bufferedWriter.write("rrange list0 2 5\r\n");
             // bufferedWriter.write("rpush list1  value123 value987\r\n");
-            bufferedWriter.write("rrange list0\r\n");
+            // bufferedWriter.write("rrange list0\r\n");
             // bufferedWriter.write("expire list0 20\r\n");
             // bufferedWriter.write("ttl list0\r\n");
             // bufferedWriter.write("llen list0 list1\r\n");

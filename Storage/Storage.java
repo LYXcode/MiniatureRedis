@@ -3,6 +3,7 @@ package Storage;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.xml.crypto.Data;
 
@@ -13,7 +14,7 @@ import DataType.SetType;
 import DataType.StringType;
 import Meta.Types;
 import Utils.RedisUtils;
-
+import jdk.internal.joptsimple.internal.Strings;
 
 public class Storage {
     private volatile static Storage storage;
@@ -125,6 +126,166 @@ public class Storage {
         }
 
         return ttl / 1000;
+    }
+
+    public synchronized int setAdd(String key, String value) {
+        String type = dataTypes[2];
+        DataType set;
+        if (exists(key) && checkKeyValidation(key, type)) {
+            set = getDataFromKey(key);
+            try {
+                set.getSetData().add(value);
+            } catch (Exception e) {
+                return 0;
+            }
+        } else {
+            if (!checkKeyValidation(key, type)) {
+                return 0;
+            }
+            set = new SetType();
+            set.getSetData().add(value);
+            StorageMap.get(type).put(key, set);
+            keyPool.put(key, type);
+        }
+
+        return 1;
+
+    }
+
+    public synchronized int setRemove(String key, String value) {
+        String type = dataTypes[2];
+        ttl(key);
+        if ((!exists(key)) || (!checkKeyValidation(key, type))) {
+            return 0;
+        }
+        int result = 0;
+        DataType data = getDataFromKey(key);
+        try {
+            result = data.getSetData().remove(value) ? 1 : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+        return result;
+    }
+
+    public int setIsMenber(String key, String value) {
+        ttl(key);
+        DataType data = getDataFromKey(key);
+
+        int result = 0;
+        try {
+            result = data.getSetData().contains(value) ? 1 : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+
+        return result;
+    }
+
+    public String setMembers(String key) {
+        ttl(key);
+        if (!exists(key)) {
+            return null;
+        }
+        String result = "";
+        try {
+            DataType data = getDataFromKey(key);
+
+            Object[] results = data.getSetData().toArray();
+
+            for (int i = 0; i < results.length; i++) {
+                result = result + results[i].toString() + " ";
+            }
+
+        } catch (Exception e) {
+
+            return null;
+        }
+
+        return result;
+    }
+
+    public String setUnion(String[] keys) {
+        String result = "";
+
+        HashSet<String> rSet = new HashSet<>();
+        for (int i = 0; i < keys.length; i++) {
+            String key = keys[i];
+            ttl(key);
+            if (!exists(key)) {
+
+                return null;
+            }
+
+            try {
+                DataType data = getDataFromKey(key);
+                HashSet<String> keySet = data.getSetData();
+                Object[] contents = keySet.toArray();
+                for (int j = 0; j < contents.length; j++) {
+                    if (rSet.contains(contents[j].toString())) {
+                        continue;
+                    }
+
+                    rSet.add(contents[j].toString());
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        Object[] res = rSet.toArray();
+        for (int i = 0; i < res.length; i++) {
+            result = result + res[i].toString() + " ";
+        }
+        return result;
+    }
+
+    public synchronized String setPop(String key, int numbers) {
+        ttl(key);
+        if (!exists(key) || numbers < 1) {
+            return null;
+        }
+        DataType data = getDataFromKey(key);
+        String result = "";
+        try {
+            Object[] res =  data.getSetData().toArray();
+            if (numbers > res.length) {
+                numbers = res.length;
+            }
+
+            for (int i = 0; i < numbers; i++) {
+                result = result + res[i].toString() + " ";
+                data.getSetData().remove(res[i].toString());
+            }
+        } catch (Exception e) {
+            return null;
+        }
+
+        return result;
+    }
+
+    public synchronized String setRandMembers(String key, int numbers) {
+        ttl(key);
+        if (!exists(key) || numbers < 1) {
+            return null;
+        }
+        DataType data = getDataFromKey(key);
+        String result = "";
+        try {
+            Object[] res = data.getSetData().toArray();
+            if (numbers > res.length) {
+                numbers = res.length;
+            }
+
+            for (int i = 0; i < numbers; i++) {
+                result = result + res[i].toString() + " ";
+
+            }
+        } catch (Exception e) {
+            return null;
+        }
+
+        return result;
     }
 
     public synchronized int listPush(String key, String value, boolean leftPush) {

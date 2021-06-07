@@ -51,6 +51,18 @@ public class CommandHandlerFactory {
             case "LPOP":
                 commandHandler = new PopHandler();
                 break;
+            case "SADD":
+            case "SREM":
+                commandHandler = new SetAddRemHandler();
+                break;
+
+            case "SISMEMBER":
+            case "SMEMBERS":
+            case "SUNION":
+            case "SRANDMEMBERS":
+            case "SPOP":
+                commandHandler = new SetMembersHandler();
+                break;
             default:
                 commandHandler = null;
 
