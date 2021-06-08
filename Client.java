@@ -15,10 +15,15 @@ public class Client {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 
+            // bufferedWriter.write("hset hash0 name0 value0 name1 value1\r\n");
+            // bufferedWriter.write("hget hash0\r\n");
+            bufferedWriter.write("hdel hash0 name\r\n");
+
+
             // bufferedWriter.write("sadd set0 value0 value1 value3 value123456\r\n");
             // bufferedWriter.write("sadd set1 value3 value123456 valuehhhhh\r\n");
             // bufferedWriter.write("srem set0 value0\r\n");
-            bufferedWriter.write("smembers set0\r\n");
+            // bufferedWriter.write("smembers set0\r\n");
             // bufferedWriter.write("sunion set0 set1\r\n");
             // bufferedWriter.write("sismember set0 value12\r\n");
             // bufferedWriter.write("srandmembers set0 3\r\n");

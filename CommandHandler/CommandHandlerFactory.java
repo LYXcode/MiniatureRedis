@@ -63,6 +63,12 @@ public class CommandHandlerFactory {
             case "SPOP":
                 commandHandler = new SetMembersHandler();
                 break;
+
+            case "HSET":
+            case "HGET":
+            case "HDEL":
+                commandHandler = new HashCommandsHandler();
+                break;
             default:
                 commandHandler = null;
 

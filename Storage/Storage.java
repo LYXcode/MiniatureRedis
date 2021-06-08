@@ -15,6 +15,7 @@ import DataType.StringType;
 import Meta.Types;
 import Utils.RedisUtils;
 import jdk.internal.joptsimple.internal.Strings;
+import jdk.internal.net.http.frame.PingFrame;
 
 public class Storage {
     private volatile static Storage storage;
@@ -248,7 +249,7 @@ public class Storage {
         DataType data = getDataFromKey(key);
         String result = "";
         try {
-            Object[] res =  data.getSetData().toArray();
+            Object[] res = data.getSetData().toArray();
             if (numbers > res.length) {
                 numbers = res.length;
             }
@@ -288,14 +289,93 @@ public class Storage {
         return result;
     }
 
+    public synchronized int hashSet(String key, String name, String value) {
+        String type = dataTypes[3];
+        if (exists(key)) {
+            try {
+                DataType data = getDataFromKey(key);
+                data.getDataHash().put(name, value);
+            } catch (Exception e) {
+                return 0;
+            }
+        } else {
+            if (!checkKeyValidation(key, type)) {
+                return 0;
+            }
+            HashType hash = new HashType();
+            hash.getDataHash().put(name, value);
+            StorageMap.get(type).put(key, hash);
+            keyPool.put(key, type);
+        }
+
+        return 1;
+    }
+
+    public String hashGet(String key, String[] names) {
+        ttl(key);
+        if (!exists(key)) {
+            return null;
+        }
+
+        DataType data = getDataFromKey(key);
+        String result = "";
+        try {
+            HashMap<String, String> hash = data.getDataHash();
+            if (names == null || names.length == 0) {
+                for (String name : hash.keySet()) {
+                    result = name + " " + hash.get(name) + " " + result;
+                }
+            } else {
+                for (String name : names) {
+                    result = result + hash.get(name) + " ";
+                }
+            }
+        } catch (Exception e) {
+            return null;
+        }
+
+        return result;
+
+    }
+
+    public synchronized int hashDelete(String key, String name) {
+        ttl(key);
+        if (!exists(key)) {
+            return 0;
+        }
+        int result = 0;
+
+        DataType data = getDataFromKey(key);
+        try {
+            HashMap<String, String> hash = data.getDataHash();
+            if(hash.containsKey(name)){
+                hash.remove(name);
+                result = 1;
+            }
+            else{
+                result = 0;
+            }
+
+
+        } catch (Exception e) {
+            return 0;
+        }
+
+        return result;
+    }
+
     public synchronized int listPush(String key, String value, boolean leftPush) {
         String type = dataTypes[1];
         if (exists(key)) {
-            DataType data = getDataFromKey(key);
-            if (!leftPush) {
-                data.getDataList().add(value);
-            } else {
-                data.getDataList().add(0, value);
+            try {
+                DataType data = getDataFromKey(key);
+                if (!leftPush) {
+                    data.getDataList().add(value);
+                } else {
+                    data.getDataList().add(0, value);
+                }
+            } catch (Exception e) {
+                return 0;
             }
 
         }
