@@ -1,10 +1,11 @@
 package DataType;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class DataType {
+public class DataType implements Serializable{
     public long expireTime = 0L;
 
     public long getExpireTime() {

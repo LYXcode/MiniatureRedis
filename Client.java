@@ -16,8 +16,8 @@ public class Client {
 
 
             // bufferedWriter.write("hset hash0 name0 value0 name1 value1\r\n");
-            // bufferedWriter.write("hget hash0\r\n");
-            bufferedWriter.write("hdel hash0 name\r\n");
+            bufferedWriter.write("hget hash0\r\n");
+            // bufferedWriter.write("hdel hash0 name\r\n");
 
 
             // bufferedWriter.write("sadd set0 value0 value1 value3 value123456\r\n");

@@ -1,23 +1,25 @@
 package Storage;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 
 import DataType.DataType;
 import DataType.SetType;
 import DataType.StringType;
 
-
 public class MyTest {
-public static void main(String[] args) {
-    HashMap<String, DataType> d = new HashMap<>();
-    StringType s = new StringType();
-    s.setData("data");
-    d.put("key", s);
-    d.put("d", new SetType());
+    public static void main(String[] args) {
 
-    System.out.println(d.get("key").getData());
-    System.out.println(d.get("d").getData());
-    
+        Storage.recoverData("./DataBackup/persistence.out");
+        System.out.println(Storage.getStorage().testInfo);
+        StringType value =  new StringType();
+        value.setData("data");
+        System.out.println(Storage.getStorage().setString("key",value));
+        System.out.println(Storage.getStorage().getString("key").getData());
 
-}
+
+    }
 }

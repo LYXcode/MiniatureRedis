@@ -19,7 +19,21 @@ import Response.RedisResponse;
 
 public class ProtocolHandler extends AbstractProtocolHandler {
 
-    public void handleRequest(Socket socket) throws IOException {
+    public Socket socket;
+    public ProtocolHandler(Socket socket){
+        this.socket = socket;
+    }
+
+    public void run(){
+        try {
+            handleRequest();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public void handleRequest() throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         ArrayList<String> stringBuffer = new ArrayList<>();
@@ -44,12 +58,6 @@ public class ProtocolHandler extends AbstractProtocolHandler {
         bufferedWriter.write(response.toString());
         bufferedWriter.flush();
         bufferedWriter.close();
-
-    }
-
-    public DataType checkCommandType(String firstLine) {
-        String[] strings = firstLine.split("\\s+");
-        DataType type = DataType.valueOf(strings[0].toUpperCase());
 
     }
 

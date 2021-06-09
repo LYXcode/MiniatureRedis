@@ -1,5 +1,10 @@
 package Storage;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,21 +19,23 @@ import DataType.SetType;
 import DataType.StringType;
 import Meta.Types;
 import Utils.RedisUtils;
-import jdk.internal.joptsimple.internal.Strings;
-import jdk.internal.net.http.frame.PingFrame;
 
-public class Storage {
+
+public class Storage implements Serializable {
+    private static final long serialVersionUID = 3472506294868168617L;
     private volatile static Storage storage;
 
     private volatile HashMap<String, DataType> stringStorage;
     private volatile HashMap<String, DataType> listStorage;
     private volatile HashMap<String, DataType> hashStorage;
     private volatile HashMap<String, DataType> setStorage;
-    private volatile HashMap<String, String> keyPool;
+    public volatile HashMap<String, String> keyPool;
     private volatile HashMap<String, HashMap<String, DataType>> StorageMap;
     private volatile String[] dataTypes = { "STRING", "LIST", "SET", "HASH" };
+    public String testInfo = "0";
 
     private Storage() {
+
         stringStorage = new HashMap<>();
         listStorage = new HashMap<>();
         hashStorage = new HashMap<>();
@@ -51,6 +58,25 @@ public class Storage {
             }
         }
         return storage;
+    }
+
+    public static void recoverData(String recoverPath){
+        ObjectInputStream oin;
+        try {
+            oin = new ObjectInputStream(new FileInputStream(recoverPath));
+            storage = (Storage) oin.readObject();
+            oin.close();
+
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public boolean setString(String key, StringType value) {
@@ -348,14 +374,12 @@ public class Storage {
         DataType data = getDataFromKey(key);
         try {
             HashMap<String, String> hash = data.getDataHash();
-            if(hash.containsKey(name)){
+            if (hash.containsKey(name)) {
                 hash.remove(name);
                 result = 1;
-            }
-            else{
+            } else {
                 result = 0;
             }
-
 
         } catch (Exception e) {
             return 0;
@@ -529,6 +553,4 @@ public class Storage {
         return true;
     }
 
-    public synchronized void write() {
-    }
 }

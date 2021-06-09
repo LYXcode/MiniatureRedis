@@ -1,6 +1,6 @@
 package Protocol;
 
 
-public abstract class AbstractProtocolHandler {
+public abstract class AbstractProtocolHandler implements Runnable{
 
 }
