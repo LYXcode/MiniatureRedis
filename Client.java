@@ -69,7 +69,6 @@ public class Client {
     // bufferedWriter.write("hget hash0\r\n");
     // bufferedWriter.write("hdel hash0 name\r\n");
 
-
     public String hdel(String key, String name) throws IOException {
 
         String command = "hget " + key + " " + name + " ";
