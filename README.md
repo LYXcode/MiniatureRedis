@@ -1,8 +1,56 @@
 # MiniatureRedis
-## Redis问题1  
- redis存在一个问题 就是对于list类型的数据，如果有新增一个同名的String，那么便无法继续操作这个list：lpush l "hdsa" -> set l a -> lrange l 0 -1 这样就会得到一个错误 (error) WRONGTYPE Operation against a key holding the wrong kind of value.
 
- 使用keyPool (key字符串， datatype字符串) 来表示这个对应的是哪个数据类型 keyPool存放着所有类型数据的key，以及key对应的数据类型  storageMap则是(datatype字符串， 实际用于类型存储的hashmap) storageMap 则是存放在所有类型的存储hashmap  通过这种方式来避免不同类型间的覆盖，比如已经有一个string类型的key0 这个就不允许除了string类型以外的数据类型有key0这个关键字，同类型可以进行覆盖。
- 采用keypool和storageMap 也可以迅速定位对应key的存储所在，可以不用去遍历检查每一个类型的存储是否有这个key，方便操作。
+## 实现
+### 数据类型：  
+基于java，实现了string， list， set， hash等四个数据类型。
+### 命令：  
+1.通用命令：  
+expire：用于设置键的过期时间。  
+del：用于删除指定键。  
+exists：用于判断键是否存在。  
+ttl：获取键的剩余过期时间，如果已经过期则会执行删除操作。  
+persist：取消键的过期设置。  
 
- 之所以分开存储的是因为 如果只用一个hashmap来存数据 那么对于一个已经存在的key，较难判断是否是同类型可以覆盖。
+2.set数据类型：  
+set：设置新的字符串 set key value  
+get:获取指定键的字符串值，get key  
+strlen：获取指定键的字符串值得字符串长度  
+decr， incr：对于是数字得字符串值进行减1和增1。  
+
+3.list数据类型：  
+rpush:从列表的右边新增新的元素。  
+lpush：从列表的左边新增新的元素。  
+rrange：获取元素从右边起。  
+lrange：获取元素从左边起。  
+llen：获取列表的长度，即元素个数。  
+rpop：从右边弹出元素。  
+lpop：从左边弹出元素。  
+
+4.set数据类型：  
+sadd：增加新的元素，如果已经存在则无效。  
+srem：删除指定元素。  
+smembers：获取所有的元素。  
+sunion：获取多个set的元素并集。  
+sismember：确认是否含有指定元素  
+srandmembers：随机获取指定个数的元素，但不删除元素。    
+spop：随机获取指定个数的元素，并删除元素。  
+
+5.hash数据类型：
+hset：设置新的键值对。  
+hget：获取指定hash数据里的指定键的值  
+hdel：删除指定hash里面指定键的值。  
+
+## 过期策略
+1.惰性过期：默认在对键进行操作时检查过期时间，如若过期则删除，反之则返回对应内容。
+2.积极过期：允许设置指定时间周期内检查每个键的过期时间，并删除过期的键。
+
+## 持久化策略  
+1.默认不开启持久化。
+2.可通过配置服务器开启RDB持久化，则指定时间周期内，将数据保存到本地。并可以在服务器开启时指定是否从本地恢复数据。
+
+
+## 说明  
+ redis存在一个问题 就是对于不同类型的数据，如果有新增一个同名的String，那么便无法继续操作这个被覆盖的数据.  
+ 在此项目中使用keyPool (key字符串， datatype字符串) 来表示键名及其对应的数据类型。keyPool存放着所有类型数据的键，以及键对应的数据类型  storageMap则是(数据类型字符串， 实际用于类型存储的hashmap) storageMap存放在所有类型的存储hashmap  通过这种方式来避免不同类型间的覆盖，比如已经有一个string类型的key0 这个就不允许除了string类型以外的数据类型有key0这个关键字，同类型可以进行覆盖。
+ 采用keypool和storageMap 也可以迅速定位对应key的存储所在，可以不用去遍历检查每一个类型的存储是否有这个key，方便操作。  
+ 每一个数据类都有一个对应hashmap容器来存储数据，之所以分开存储的是因为 如果只用一个hashmap来存数据 那么对于一个已经存在的key，较难判断是否是同类型可以覆盖。
